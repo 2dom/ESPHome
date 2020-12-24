@@ -1,0 +1,69 @@
+# This creates Home Assistant monochromatic lamps using every channel of P9813 RGB PWM modules individually. Hence on module gives you three lights / splitting the RGB channels 
+
+esphome:
+  name: living_room_1
+  platform: ESP8266
+  board: nodemcuv2
+  includes:
+    - p9813_component.h
+
+wifi:
+  ssid: "xx"
+  password: "xx"
+
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: "yyy"
+
+ota:
+  password: "yy"
+
+
+#globals:
+#  - id: _output_no
+#    type: uint8_t
+#    restore_value: no
+#    initial_value: '0'
+
+sensor:
+  - platform: rotary_encoder
+    name: "TableEncoder"
+    pin_a: D6
+    pin_b: D7
+    min_value: 0
+    max_value: 100
+    resolution: 2
+    filters:
+      - delta: 4.0
+
+switch:
+  - platform: gpio
+    pin: D5
+    name: "TableSwitch"
+  
+light:
+  - platform: custom
+    lambda: |-
+      auto table_down = new MyCustomLightOutput();
+      table_down->set_output(0);
+      App.register_component(table_down);
+
+      auto table_up = new MyCustomLightOutput();
+      table_up->set_output(1);
+      App.register_component(table_up);
+
+      auto table_grow = new MyCustomLightOutput();
+      table_grow->set_output(2);
+      App.register_component(table_grow);
+
+
+      return {table_down,table_up,table_grow};
+  
+    lights:
+      - name: "TableDown"
+      - name: "TableUp"
+      - name : "TableGrow"
